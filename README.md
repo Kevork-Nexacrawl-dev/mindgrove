@@ -21,6 +21,20 @@ Built from a real workflow used to manage **1,300+ AI system prompts** in Obsidi
 
 ---
 
+## Works everywhere markdown lives
+
+| Environment | YAML Frontmatter | Wikilinks | Visual Graph |
+|---|---|---|---|
+| **Obsidian** | ✅ | ✅ | ✅ Graph View |
+| **Foam** (VS Code) | ✅ | ✅ | ✅ Foam Graph |
+| **Logseq** | ✅ | ✅ | ✅ Graph View |
+| **Dendron** | ✅ | ✅ | ✅ Tree View |
+| **Plain markdown folder** | ✅ | ✅ | — (data is there, use any renderer) |
+
+No matter where your notes live — mindgrove enriches them. The `[[wikilinks]]` it writes are understood by every major PKM tool, so your graph appears automatically next time you open the vault.
+
+---
+
 ## Install
 
 ```bash
@@ -38,42 +52,20 @@ npm install mindgrove
 ## CLI Usage
 
 ```bash
-# Analyze a vault folder
+# Analyze any markdown folder
 mindgrove analyze ./my-vault
+
+# Works directly on your Obsidian vault
+mindgrove analyze /path/to/obsidian-vault
 
 # With custom options
 mindgrove analyze ./my-vault --threshold 20 --max-connections 8
 
-# Dry run (analyze only, no file writes)
+# Dry run — analyze only, no file writes
 mindgrove analyze ./my-vault --dry-run
 
-# Skip linking (just tag files)
+# Skip linking (just tag files, no wikilinks)
 mindgrove analyze ./my-vault --no-linking
-```
-
----
-
-## Library Usage
-
-```js
-import { analyzeVault } from 'mindgrove';
-
-const result = await analyzeVault('./my-vault', {
-  similarityThreshold: 15,
-  maxConnectionsPerFile: 12,
-  enableLinking: true,
-
-  // Extend with your own patterns
-  customRoles: {
-    'finance-agent': /trading|portfolio|equity/i,
-  },
-  customDomains: {
-    'fintech': /\bfinance\b|\btrading\b|\bstocks\b/i,
-  },
-});
-
-console.log(`Processed: ${result.processed} files`);
-console.log(`Connections: ${result.connections} links written`);
 ```
 
 ---
@@ -110,6 +102,33 @@ status: active
 ---
 ```
 
+Open your vault in Obsidian after running mindgrove — every connected note pair appears as an edge in Graph View automatically.
+
+---
+
+## Library Usage
+
+```js
+import { analyzeVault } from 'mindgrove';
+
+const result = await analyzeVault('./my-vault', {
+  similarityThreshold: 15,
+  maxConnectionsPerFile: 12,
+  enableLinking: true,
+
+  // Extend with your own patterns
+  customRoles: {
+    'finance-agent': /trading|portfolio|equity/i,
+  },
+  customDomains: {
+    'fintech': /\bfinance\b|\btrading\b|\bstocks\b/i,
+  },
+});
+
+console.log(`Processed: ${result.processed} files`);
+console.log(`Connections: ${result.connections} links written`);
+```
+
 ---
 
 ## Configuration
@@ -130,6 +149,26 @@ status: active
 
 ---
 
+## Sophistication scoring
+
+mindgrove scores every note from `standard` → `elite` based on a weighted formula:
+
+```
+score = (techniques × 2) + (constraints × 1.5) + (capabilities × 1) + (tools × 1)
+```
+
+| Score | Label |
+|---|---|
+| 25+ | `elite` |
+| 18–24 | `advanced` |
+| 12–17 | `sophisticated` |
+| 6–11 | `intermediate` |
+| 0–5 | `standard` |
+
+Filter by `sophistication: elite` in Obsidian's search to instantly surface your best notes.
+
+---
+
 ## Real-world example
 
 This library was extracted from a personal Obsidian vault containing **1,300+ AI system prompts**. Running `mindgrove analyze` on that vault:
@@ -138,6 +177,33 @@ This library was extracted from a personal Obsidian vault containing **1,300+ AI
 - Found 847 high-quality similarity connections above threshold 15
 - Wrote bidirectional `[[wikilinks]]` into every connected pair
 - Enabled Obsidian Graph View filtering by `sophistication: elite` to instantly surface the best prompts
+
+---
+
+## Project structure
+
+```
+mindgrove/
+├── src/
+│   ├── index.js            ← public API exports
+│   ├── config.js           ← fully overridable DEFAULT_CONFIG
+│   ├── analyzer.js         ← Phase 1 (tag) + Phase 2 (link) orchestrator
+│   ├── similarity.js       ← weighted scoring matrix engine
+│   ├── linker.js           ← bidirectional wikilink writer
+│   ├── frontmatter.js      ← YAML generator (preserves existing user fields)
+│   └── detectors/
+│       ├── role.js           ← 3-tier role detection
+│       ├── capabilities.js   ← 14 capability patterns
+│       ├── techniques.js     ← 12 prompt-engineering technique patterns
+│       ├── tools.js          ← 10 tool patterns
+│       ├── domain.js         ← content-based domain detection
+│       └── sophistication.js ← weighted scorer
+├── cli/index.js            ← mindgrove analyze <path>
+├── sample-vault/           ← 6 ready-to-run sample markdown files
+├── examples/
+│   └── ai-prompt-vault.js  ← real-world 1300-file use case
+└── obsidian/               ← original Obsidian Templater script (inspiration)
+```
 
 ---
 
