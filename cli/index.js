@@ -27,18 +27,27 @@ program
 
     const config = {
       ...DEFAULT_CONFIG,
-      similarityThreshold: options.threshold ?? DEFAULT_CONFIG.similarityThreshold,
-      maxConnectionsPerFile: options.maxConnections ?? DEFAULT_CONFIG.maxConnectionsPerFile,
-      enableLinking: options.linking !== false,
-      dryRun: options.dryRun ?? false,
-      reportFormat: options.report ?? 'markdown',
+      similarityThreshold:  options.threshold       ?? DEFAULT_CONFIG.similarityThreshold,
+      maxConnectionsPerFile: options.maxConnections  ?? DEFAULT_CONFIG.maxConnectionsPerFile,
+      enableLinking:        options.linking !== false,
+      dryRun:               options.dryRun ?? false,
+      reportFormat:         options.report  ?? 'markdown',
     };
 
     const spinner = ora('Phase 1: Analyzing files...').start();
 
     try {
       const result = await analyzeVault(absPath, config);
-      spinner.succeed(`Phase 1 complete — ${result.processed} files analyzed in ${result.durationSeconds}s`);
+      spinner.stop();
+
+      if (result.processed === 0) {
+        console.log(chalk.yellow('⚠  No markdown files found in that folder.'));
+        console.log(chalk.gray('   Make sure the path contains .md files.\n'));
+        console.log(chalk.gray('   Try: mindgrove analyze ./sample-vault\n'));
+        process.exit(0);
+      }
+
+      console.log(chalk.green(`✔ Phase 1 complete — ${result.processed} files analyzed in ${result.durationSeconds}s`));
 
       if (config.enableLinking && !config.dryRun) {
         console.log(chalk.cyan(`\n🔗 Phase 2: ${result.connections} bidirectional links written`));

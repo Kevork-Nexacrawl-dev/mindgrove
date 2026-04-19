@@ -13,14 +13,9 @@ import { generateFrontmatter } from './frontmatter.js';
 import { buildSimilarityMatrix } from './similarity.js';
 import { applyBidirectionalLinks } from './linker.js';
 
-/**
- * Main entry point.
- * @param {string} vaultPath  - absolute path to the folder to process
- * @param {object} userConfig - partial config object (merged with DEFAULT_CONFIG)
- * @returns {object}          - report: { processed, errors, connections, metadata }
- */
 export async function analyzeVault(vaultPath, userConfig = {}) {
   const config = { ...DEFAULT_CONFIG, ...userConfig };
+  const startTime = Date.now();
 
   // ── 1. Collect files ──────────────────────────────────────────────────────
   const pattern = path.join(vaultPath, '**/*.md').replace(/\\/g, '/');
@@ -32,14 +27,19 @@ export async function analyzeVault(vaultPath, userConfig = {}) {
   });
 
   if (files.length === 0) {
-    return { processed: 0, errors: 0, connections: 0, metadata: new Map() };
+    return {
+      processed: 0,
+      errors: 0,
+      connections: 0,
+      metadata: new Map(),
+      durationSeconds: 0,
+    };
   }
 
   // ── 2. Phase 1 — Analyze & tag each file ─────────────────────────────────
   const fileMetadata = new Map();
   let processed = 0;
   let errors = 0;
-  const startTime = Date.now();
 
   for (const filePath of files) {
     try {
@@ -55,11 +55,11 @@ export async function analyzeVault(vaultPath, userConfig = {}) {
         tokenCount > 1000 ? 'large' :
         tokenCount > 500  ? 'medium' : 'small';
 
-      const role         = detectRole(content, filePath, config);
-      const capabilities = detectCapabilities(content, config);
-      const techniques   = detectTechniques(content, config);
-      const tools        = detectTools(content, config);
-      const domain       = detectDomain(content, filePath, config);
+      const role           = detectRole(content, filePath, config);
+      const capabilities   = detectCapabilities(content, config);
+      const techniques     = detectTechniques(content, config);
+      const tools          = detectTools(content, config);
+      const domain         = detectDomain(content, filePath, config);
       const sophistication = scoreSophistication({ techniques, capabilities, tools });
 
       const meta = {
@@ -99,7 +99,7 @@ export async function analyzeVault(vaultPath, userConfig = {}) {
   }
 
   process.stdout.write('\n');
-  const phase1Duration = Math.round((Date.now() - startTime) / 1000);
+  const durationSeconds = Math.round((Date.now() - startTime) / 1000);
 
   // ── 3. Phase 2 — Similarity matrix & bidirectional links ─────────────────
   let connections = 0;
@@ -109,11 +109,5 @@ export async function analyzeVault(vaultPath, userConfig = {}) {
     await applyBidirectionalLinks(matrix, config);
   }
 
-  return {
-    processed,
-    errors,
-    connections,
-    metadata: fileMetadata,
-    durationSeconds: phase1Duration,
-  };
+  return { processed, errors, connections, metadata: fileMetadata, durationSeconds };
 }
