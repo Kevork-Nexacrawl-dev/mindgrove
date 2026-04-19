@@ -1,3 +1,3 @@
-# v0.1.0
+# Releases
 
-Initial release of mindgrove.
+See GitHub Releases for changelog.
