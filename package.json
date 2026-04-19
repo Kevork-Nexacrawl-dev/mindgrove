@@ -1,0 +1,45 @@
+{
+  "name": "mindgrove",
+  "version": "0.1.0",
+  "description": "🌿 Analyze, classify, and auto-link any markdown vault. Role detection, sophistication scoring, and bidirectional similarity linking for knowledge bases at scale.",
+  "main": "src/index.js",
+  "bin": {
+    "mindgrove": "./cli/index.js"
+  },
+  "scripts": {
+    "test": "node --experimental-vm-modules node_modules/.bin/jest",
+    "lint": "eslint src/ cli/",
+    "start": "node cli/index.js"
+  },
+  "keywords": [
+    "obsidian",
+    "markdown",
+    "knowledge-graph",
+    "vault",
+    "yaml",
+    "frontmatter",
+    "similarity",
+    "zettelkasten",
+    "pkm",
+    "note-taking",
+    "llm",
+    "prompt-engineering"
+  ],
+  "author": "Kevork <nexacrawl@gmail.com>",
+  "license": "MIT",
+  "dependencies": {
+    "commander": "^11.1.0",
+    "gray-matter": "^4.0.3",
+    "glob": "^10.3.10",
+    "chalk": "^5.3.0",
+    "ora": "^7.0.1"
+  },
+  "devDependencies": {
+    "jest": "^29.7.0",
+    "eslint": "^8.57.0"
+  },
+  "engines": {
+    "node": ">=18.0.0"
+  },
+  "type": "module"
+}
